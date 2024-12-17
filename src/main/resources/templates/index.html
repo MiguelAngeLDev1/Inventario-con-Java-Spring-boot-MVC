@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <meta charset="UTF-8">
+    <title>Inventarios</title>
+
+    <!--Enlace css-->
+    <link rel="stylesheet" href="/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+</head>
+<body>
+
+<div>
+    <nav class="navbar navbar-expand-lg bg-body-tertiary">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/"><i class="fa-solid fa-clipboard"></i> Inventario</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+                <div class="navbar-nav">
+                    <a class="nav-link active" aria-current="page" href="/"><i class="fa-solid fa-house"></i> Inicio</a>
+
+                    <div class="dropdown">
+                        <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fa-solid fa-dolly"></i> Productos
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li><a class="nav-link" href="/agregar">Ingresar Producto</a></li>
+                            <li><a class="nav-link" href="/productos">Listar Productos</a></li>
+                        </ul>
+                    </div>
+
+                    <div class="dropdown">
+                        <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fa-solid fa-wallet"></i> Ventas
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li><a class="nav-link" href="/ventas/realizar">Venta</a></li>
+                            <li><a class="nav-link" href="/ventas/detalles">Lista de Ventas</a></li>
+                        </ul>
+                    </div>
+
+                    <div class="dropdown">
+                        <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fa-solid fa-magnifying-glass-chart"></i> Categorias
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li><a class="nav-link" href="/categorias/nuevo">Ingresar Categoria</a></li>
+                            <li><a class="nav-link" href="/categorias/listar">Listar Categorias</a></li>
+                        </ul>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </nav>
+</div>
+
+<br>
+<div class="position-relative py-2 px-4 t ">
+    <h1>Bienvenido a <span>Inventario web</span></h1>
+    <p class="user-select-none">Te doy la bienvenida a mi aplicativo web gestion de inventario,<br>El proposito de esta es que puedas realizar una gestion de inventario de una manera mas facil.
+    </p>
+</div>
+
+<div class="container mt-4">
+    <div class="row">
+        <!-- Card Productos -->
+        <div class="col-md-4"> <!-- Cada card ocupa 4 columnas de las 12 disponibles -->
+            <div class="card" style="width: 18rem;">
+                <img src="/img/products.jpg" class="card-img-top" alt="...">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="fa-solid fa-box-open"></i> Productos</h5>
+                    <p class="card-text">Algunos productos para mostrar.</p>
+                    <a href="/productos" class="btn btn-primary">Ver más</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Card Categorias -->
+        <div class="col-md-4">
+            <div class="card" style="width: 18rem;">
+                <img src="/img/category.jpg" class="card-img-top" alt="...">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="fa-solid fa-magnifying-glass"></i> Categorías</h5>
+                    <p class="card-text">Diferentes categorías de productos.</p>
+                    <a href="/categorias/listar" class="btn btn-primary">Explorar</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Card Venta -->
+        <div class="col-md-4">
+            <div class="card" style="width: 18rem;">
+                <img src="/img/sale.jpg" class="card-img-top" alt="...">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="fa-solid fa-arrow-trend-up"></i> Ventas</h5>
+                    <p class="card-text">Información sobre ventas recientes.</p>
+                    <a href="/ventas/detalles" class="btn btn-primary">Detalles</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<br>
+<br>
+<br>
+<br>
+<div class="card footer-card text-center">
+    <div class="card-header">
+        Inventarios
+    </div>
+    <div class="card-body">
+        <h5 class="card-title">Miguel Angel Quesada Sanchez</h5>
+        <p class="card-text">Aprendizaje continuo.</p>
+        <a href="https://www.linkedin.com/in/miguelangelquesada/" class="btn btn-primary">Deja un mensaje</a>
+    </div>
+    <div class="card-footer text-body-secondary">
+        4/11/2024
+    </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+</body>
+</html>

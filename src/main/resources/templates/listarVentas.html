@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+
+    <meta charset="UTF-8">
+    <title>Inventarios</title>
+    <!--Enlace css-->
+    <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+<div>
+    <nav class="navbar navbar-expand-lg bg-body-tertiary">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/">Inventario</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavAltMarkup"
+                    aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+                <div class="navbar-nav">
+                    <a class="nav-link active" aria-current="page" href="/">Inicio</a>
+                    <a class="nav-link" href="/ventas/detalles">Lista de Ventas</a>
+
+
+                </div>
+            </div>
+        </div>
+    </nav>
+</div>
+<br>
+<br>
+<div class="position-relative py-2 px-4 t ">
+    <h1>Bienvenido a <span class="badge text-bg-secondary">Ventas</span></h1>
+    <p class="user-select-none">Puedes agregar productos a alguna ventaaqui,<br>aqui podras agregar productos.
+    </p>
+</div>
+<br>
+<br>
+<div class="container">
+    <form th:action="@{/guardar}" th:object="${ventaDTO}" method="post">
+        <h3>Realizar Venta</h3>
+
+
+        <!--Tabla para mostrar los productos agregados a la venta-->
+        <h3>Productos Agregados a la Venta</h3>
+        <!--Barra de busqueda-->
+        <input type="text" id="buscarProducto" class="form-control" placeholder="Buscar Producto..." onkeyup="filtrarProductos()">
+        <table class="table" id="productosSeleccionados">
+            <thead>
+            <tr>
+                <th>Producto</th>
+                <th>Cantidad en Inventario</th>
+                <th>Cantidad a Vender</th>
+                <th>Precio</th>
+                <th>Accion</th>
+            </tr>
+            </thead>
+            <tbody >
+            <!--Aqui se mostraran los productos agregados con javaScript-->
+            <tr th:each="producto, iterStat : ${productos}">
+                <td th:text="${producto.nombreProducto}"></td>
+                <td class="cantidad-inventario" th:text="${producto.cantidadProducto}"></td>
+                <td>
+                    <!--Input para ingresar la cantidad a vender-->
+                    <input type="number"
+                           th:field="*{detallesVenta[__${iterStat.index}__].cantidad}"
+                           id="cantidad-${producto.idProducto}"
+                           min="1"
+                           th:attr="max=${producto.cantidadProducto}"
+                           class="form-control cantidad-vender"
+                           placeholder="Cantidad a Vender">
+
+                    <!--Almacenar producto ID de forma  oculta para cada producto en venta-->
+                    <input type="hidden" th:field="*{detallesVenta[__${iterStat.index}__].productoId}"
+                           th:value="${producto.idProducto}">
+                    <input type="hidden" th:field="*{detallesVenta[__${iterStat.index}__].nombreProducto}"
+                           th:value="${producto.nombreProducto}">
+                    <input type="hidden" th:field="*{detallesVenta[__${iterStat.index}__].precio}"
+                           th:value="${producto.precioProducto}">
+                </td>
+                <td th:text="${producto.precioProducto}"></td>
+                <td>
+                    <!--Boton con evento onclick-->
+                    <button type="button"
+                            class="btn btn-primary"
+                            th:attr="data-id=${producto.idProducto}, data-nombre=${#strings.escapeJavaScript(producto.nombreProducto)},data-precio=${producto.precioProducto}"
+                            onclick="agregarProductoDesdeData(this)"
+                    >Añadir</button>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+
+    </form>
+
+    <!--tabla de productos seleccionados-->
+    <table class="table">
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>Producto</th>
+            <th>Cantidad</th>
+            <th>Precio Unitario</th>
+            <th>Subtotal</th>
+            <th>Acciones</th>
+        </tr>
+        </thead>
+        <tbody id="listaVenta">
+        <!--Se llenara dinamicamente-->
+        </tbody>
+        <div class="text-right mt-3">
+            <strong id="totalVenta">Total a Pagar: $0.00</strong>
+        </div>
+        <br>
+        <br>
+    </table>
+    <button class="btn btn-success" onclick="enviarVenta()">Realizar VENTA</button>
+
+
+</div>
+
+<br>
+<br>
+<br>
+<br>
+<!--footer-->
+<div class="card footer-card text-center">
+    <div class="card-header">
+        Inventarios
+    </div>
+    <div class="card-body">
+        <h5 class="card-title">Miguel Angel Quesada Sanchez</h5>
+        <p class="card-text">Aprendizaje continuo.</p>
+        <a href="https://www.linkedin.com/in/miguelangelquesada/" class="btn btn-primary">Deja un mensaje</a>
+    </div>
+    <div class="card-footer text-body-secondary">
+        4/11/2024
+    </div>
+</div>
+<!--End footer -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+        crossorigin="anonymous"></script>
+<!--Scripts de ventas-->
+<!--Script para buscar en tiempo real-->
+<script>
+    function filtrarProductos(){
+        const input = document.getElementById('buscarProducto');
+        console.log("Input capturado: ", input);//Verifica si el input es encontrado
+
+        const filtro = input.value.toLowerCase();
+        console.log("Filtro: ", filtro);//Muestra el valor actual del filtro
+
+        const filas = document.querySelectorAll('#productosSeleccionados tr')
+        console.log("Filas encontradas: ", filas);
+
+        filas.forEach(fila => {
+            const productoNombre = fila.querySelector('td:first-child');
+            console.log("ProductoNombre elemento: ", productoNombre); //Verifica si se encuentra el td
+
+            if (productoNombre){
+                const texto = productoNombre.innerText.toLowerCase();
+                console.log("Texto en la celda:", texto);//Muestra el texto que se esta evaluando
+
+                if (texto.includes(filtro)){
+                    fila.style.display = ""; //Mostrar
+                }else{
+                    fila.style.display = "none";//Ocultar
+                }
+            }
+        });
+    }
+</script>
+<!--FIN Script para buscar en tiempo real-->
+
+<script>
+    let listaVenta = [];
+
+    function agregarProducto(id,nombre,precio, cantidad){
+
+        console.log(`Producto añadido: ID: ${id},nombre: ${nombre} ,Precio: ${precio}, Cantidad: ${cantidad} `);
+
+        const productoBuscado = id;
+        //Verificar si el producto ya esta en la lista
+        const existe = listaVenta.find(p => p.id === productoBuscado);
+        if (existe){
+            console.log('El producto ya fue añadido. Puedes modificar la cantidad directamente.');
+            return;
+        }
+
+
+        //Crea el objeto del producto
+        const producto = {
+            id: parseInt(id),// Convierte el id a número
+            nombre: nombre,
+            cantidad: parseInt(cantidad),// Asegura que cantidad también sea número
+            precio: parseFloat(precio)
+        };
+        console.log("Producto creado: "," Id: " ,producto.id, "nombre: ",producto.nombre )
+        listaVenta.push(producto);
+
+        //Mostrar el producto en la lista de venta
+        mostrarListaVenta();
+
+    }
+
+    function agregarProductoDesdeData(button){
+        //Leer los valores desde los atributos data-*
+        const id = button.getAttribute('data-id');
+        const nombre = button.getAttribute('data-nombre');
+        const precio = button.getAttribute('data-precio');
+
+        console.log(`Datos del boton: ID=${id}, Nombre=${nombre}, Precio=${precio}`)
+        console.log(`Buscando input con id: cantidad-${id}`);
+
+
+        //Buscar el input en la misma fila del boton
+        const row = button.closest('tr')//Encuentra la fila del boton
+        const cantidadInput = row ? row.querySelector(`input[type="number"]`) : null;//Busca el input en la fila
+
+        if (!cantidadInput){
+            console.error(`No se encontro el input para la cantidad en la misma fila del botón.`);
+            return;
+        }
+
+        //Obtener el valor de la cantidad del input
+        const cantidad = parseInt(cantidadInput.value, 10);
+        if (isNaN(cantidad) || cantidad < 1){
+            alert('Por favor, Ingrese una cantidad válida..');
+            return;
+        }
+
+        //Llama a la funcion original con los valores
+        agregarProducto(parseInt(id),nombre,parseFloat(precio), cantidad);
+    }
+
+    function mostrarListaVenta(){
+        const contenedor = document.getElementById('listaVenta');
+        contenedor.innerHTML = '';//Limpia la tabla antes de agregar nuevas filas
+
+        listaVenta.forEach((producto,index)=> {
+            const fila = `
+            <tr>
+               <td>${producto.id}</td>
+               <td>${producto.nombre}</td>
+               <td>${producto.cantidad}</td>
+               <td>${producto.precio}</td>
+               <td>${(producto.cantidad * producto.precio).toFixed(2)}</td>
+               <td><button class="btn btn-danger" onclick="eliminarProducto(${index})">Eliminar</button></td>
+           </tr>
+            `;
+            contenedor.innerHTML += fila;
+        });
+
+        //Actualiza el total en el DOM
+        const totalContainer = document.getElementById('totalVenta');
+        const total = calcularTotal(); //Llama a la funcion para calcular el total
+        totalContainer.textContent = `Total a Pagar: $${total.toFixed(2)}`;
+    }
+
+    function eliminarProducto(index){
+        listaVenta.splice(index,1);
+        mostrarListaVenta();
+    }
+
+    function calcularTotal(){
+        return listaVenta.reduce((total,producto)=>total + (producto.cantidad * producto.precio), 0);
+    }
+
+    //Actualiza el total
+    const totalContainer = document.getElementById('totalVenta');
+    totalContainer.textContent = `Total: $${calcularTotal().toFixed(2)}`;
+
+</script>
+
+<!--Script para enviar los datos del formulario con fecth-->
+<script>
+    function enviarVenta(){
+        if (listaVenta.length === 0){
+            alert('No hay productos en la lista de venta');
+            return;
+        }
+
+        //Crear un mapa de detalles de venta
+        const detallesVenta = listaVenta.map(producto =>({
+            productoId: producto.id,
+            nombreProducto: producto.nombre,
+            cantidad: producto.cantidad,
+            precio: producto.precio
+        }))
+
+        const datosVenta = {
+            detallesVenta:  detallesVenta,
+            total: calcularTotal()
+        }
+
+        //Mostrar los datos en la consola para verificar
+        console.log('Datos enviados al backend: ',JSON.stringify(datosVenta));
+
+        //Enviar los datos al backend
+        fetch('/ventas/guardar',{
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(datosVenta),
+        })
+            .then(response =>{
+                if (!response.ok && response.status !== 201){
+                   throw new Error(`Error al guardar la venta:`);
+                }
+                return response.json();
+            })
+            .then(data=>{
+                alert('Venta registrada con Exito.');
+                listaVenta = [];//Limpia la lista de productos
+                if (data && Array.isArray(data.detallesVenta)){
+                    //Actualizar la interface de usuario con los productos actualizados
+                    actualizarTablaProductos(data.detallesVenta);
+                }else {
+                    console.error('La propiedad "Productos no existe o no es un arreglo "');
+                }
+                mostrarListaVenta();//Actualiza la tabla
+            })
+            .catch(error =>{
+                console.error('Error: ', error);
+                alert('Hubo un problema al registrar la venta.', error.message);
+            });
+    }
+
+    // Esta función actualiza la tabla con la información más reciente del inventario y de las cantidades a vender
+    function actualizarTablaProductos(productosActualizados){
+        productosActualizados.forEach(producto =>{
+            //Encontrar la fila del producto en la tabla
+            let filaProducto = document.querySelector(`#producto-${producto.id}`);
+
+            if (filaProducto){
+                //Actualizar la cantidad en invenraio
+                let cantidadInventario = filaProducto.querySelector('.cantidad-inventario');
+                if (cantidadInventario){
+                    cantidadInventario.textContent = producto.cantidad;
+                }
+
+                //Actualiza la cantidad a vender
+                let inputCatidadVender = filaProducto.querySelector('.cantidad-vender');
+                if (inputCatidadVender){
+                    inputCatidadVender.max = producto.cantidad;// Establece el maximo de la cantidad que se puede vender
+                }
+            }
+        })
+    }
+
+</script>
+</body>
+</html>

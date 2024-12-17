@@ -1,0 +1,118 @@
+body {
+    background-color: #1c1d20; /* Azul oscuro */
+    color: #e7e1e1; /* Texto blanco para contraste */
+    font-family: 'Arial', sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+.navbar {
+    background-color: #c3c5c8; /* Igual que el fondo */
+    border-bottom: 2px solid #999b9e; /* Línea decorativa */
+}
+
+.navbar a {
+    color: #1c1d20;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.navbar a:hover {
+    color: #c3c5c8; /*al pasar el ratón */
+}
+
+button {
+    background-color: #4CAF50; /* Verde para destacar */
+    color: #ffffff; /* Texto blanco */
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #c3c5c8; /* al pasar el ratón */
+}
+
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+    background-color: #999b9e; /* Fondo blanco para contraste */
+}
+
+table th, table td {
+    border: 1px solid #46474a;
+    padding: 10px;
+    text-align: left;
+}
+
+table th {
+    background-color: #4CAF50; /* Verde para el encabezado */
+    color: #585e67;
+}
+
+table tr:nth-child(even) {
+    background-color: #f2f2f2; /* Alternar filas */
+}
+
+table tr:hover {
+    background-color: #ddd; /* Resaltar al pasar el ratón */
+}
+
+
+input, select, textarea {
+    background-color: #46474a; /* Fondo azul oscuro */
+    color: #ffffff; /* Texto blanco */
+    border: 1px solid #4CAF50; /* Borde verde */
+    padding: 10px;
+    border-radius: 5px;
+    width: 100%;
+}
+
+input:focus, select:focus, textarea:focus {
+    outline: none;
+    border-color: #ffffff; /* Borde blanco al enfocarse */
+}
+
+.span{
+    background-color: #e9e9e9;;
+}
+
+.card {
+    background-color: #1c1d20;
+    color: #c3c5c8;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px #cccccc;
+    padding: 20px;
+    margin: 20px 0;
+    width: calc(33.33% - 16px);/*Tres tarjetas por fila*/
+    min-width: 250px;
+}
+
+.card-container{
+    display: flex;
+    flex-wrap: wrap;/*Permite que las tarjetas se muevan a otra fila*/
+    gap: 16px;
+    justify-content: center;/*Centra las tarjetas en filas adicionales*/
+}
+.card.footer-card {
+    background-color: transparent; /* Fondo personalizado, no el de .card */
+    width: 100%;
+    margin: 0;
+    border-radius: 0;
+    box-shadow: none;
+}
+
+.card.footer-card .card-header,
+.card.footer-card .card-footer {
+    background-color: #011627;
+    color: #ffffff;
+}
+
+.card.footer-card .card-body {
+    background-color: #2b3b75;
+    color: #ffffff;
+}
