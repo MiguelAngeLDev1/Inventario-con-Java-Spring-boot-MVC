@@ -15,9 +15,7 @@ public class VentaDTO {
 
 
     private Long id;
-
     private List<ProductoVentaDTO> detallesVenta = new ArrayList<>();
-
     private double total;//Total de la venta
     private String message;
 }

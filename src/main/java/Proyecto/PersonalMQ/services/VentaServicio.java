@@ -2,7 +2,9 @@ package Proyecto.PersonalMQ.services;
 
 import Proyecto.PersonalMQ.dtos.ProductoVentaDTO;
 import Proyecto.PersonalMQ.dtos.VentaDTO;
+import Proyecto.PersonalMQ.models.Usuario;
 import Proyecto.PersonalMQ.respository.DetalleVentaRepositorio;
+import Proyecto.PersonalMQ.respository.UsuarioRepositorio;
 import jakarta.transaction.Transactional;
 import Proyecto.PersonalMQ.models.DetalleVenta;
 import Proyecto.PersonalMQ.models.Producto;
@@ -10,6 +12,8 @@ import Proyecto.PersonalMQ.models.Venta;
 import org.springframework.beans.factory.annotation.Autowired;
 import Proyecto.PersonalMQ.respository.ProductoRepositorio;
 import Proyecto.PersonalMQ.respository.VentaRepositorio;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -28,6 +32,11 @@ public class VentaServicio implements ImplVentaServicio{
     private VentaRepositorio ventaRepositorio;
     @Autowired
     private ProductoServicio productoServicio;
+    @Autowired
+    private UsuarioRepositorio usuarioRepositorio;
+    @Autowired
+    private UsuarioServicio usuarioServicio;
+
 
 
     @Override
@@ -83,9 +92,16 @@ public class VentaServicio implements ImplVentaServicio{
 
     @Transactional
     public Venta guardarVenta(VentaDTO ventaDTO) {
+
+        //Obtener el usuario autenticado
+        String username = obtenerUsuarioAutenticado();
+        Usuario usuario = usuarioServicio.obteberUsuarioPorNombre(username);
+
+        //Crear la venta y asignar el usuario
         Venta venta = new Venta();
         venta.setTotalVenta(ventaDTO.getTotal());
         venta.setFechVenta(LocalDateTime.now());
+        venta.setUsuario(usuario);//Asociar el usuario a la venta
 
         //Guardar la venta para obtener su ID generado
         venta  = ventaRepositorio.save(venta);
@@ -112,10 +128,22 @@ public class VentaServicio implements ImplVentaServicio{
 
             //Guardar el detalle de la venta
             detalleVentaRepositorio.save(detalleVenta);
+
+            //Asignar el ventaId al DTO
+            productoVentaDTO.setVentaId(venta.getIdVenta());
         }
 
         return venta;
 
+    }
+
+    private String obtenerUsuarioAutenticado(){
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (principal instanceof UserDetails){
+            return ((UserDetails)principal).getUsername();
+        }else {
+            return principal.toString();
+        }
     }
 
     private Venta convertirVentaDTOaEntidad(VentaDTO ventaDTO){
@@ -153,6 +181,15 @@ public class VentaServicio implements ImplVentaServicio{
         venta.setDetalles(detalleVentas);
         return venta;
     }
+
+    private List<Venta> obtenerVentaPorUsuario(String nombreUsuario){
+        Usuario usuario = usuarioRepositorio.findByNombreUsuario(nombreUsuario)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+
+        return ventaRepositorio.findByUsuario(usuario);
+    }
+
+
 
 
 }

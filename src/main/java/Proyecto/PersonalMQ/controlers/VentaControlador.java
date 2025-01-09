@@ -2,23 +2,30 @@ package Proyecto.PersonalMQ.controlers;
 
 import Proyecto.PersonalMQ.dtos.ProductoVentaDTO;
 import Proyecto.PersonalMQ.dtos.VentaDTO;
+import Proyecto.PersonalMQ.dtos.VentaMapper;
 import Proyecto.PersonalMQ.models.DetalleVenta;
 import Proyecto.PersonalMQ.models.Producto;
+import Proyecto.PersonalMQ.models.Usuario;
 import Proyecto.PersonalMQ.models.Venta;
 import Proyecto.PersonalMQ.respository.DetalleVentaRepositorio;
 import Proyecto.PersonalMQ.respository.ProductoRepositorio;
 import Proyecto.PersonalMQ.respository.VentaRepositorio;
+import Proyecto.PersonalMQ.services.UsuarioServicio;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import Proyecto.PersonalMQ.services.ProductoServicio;
 import Proyecto.PersonalMQ.services.VentaServicio;
 
+import java.security.Principal;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -39,6 +46,10 @@ public class VentaControlador {
     private DetalleVentaRepositorio detalleVentaRepositorio;
     @Autowired
     private ProductoRepositorio productoRepositorio;
+    @Autowired
+    private UsuarioServicio usuarioServicio;
+    @Autowired
+    private VentaMapper ventaMapper;
 
     //Mostrar formulario para realizar una venta
     @GetMapping("/realizar")
@@ -90,6 +101,8 @@ public class VentaControlador {
 
         System.out.println("VentaDTO recibida: "+ ventaDTO);
 
+
+
         //Verificar que la ventaDTO contiene productos
         if(ventaDTO.getDetallesVenta() == null || ventaDTO.getDetallesVenta().isEmpty()){
             model.addAttribute("error", " No se han agregado productos a la venta.");
@@ -101,6 +114,17 @@ public class VentaControlador {
             Venta venta = new Venta();
             venta.setFechVenta(LocalDateTime.now());
             venta.setTotalVenta(ventaDTO.getTotal());
+
+            //Obtener el usuario autenticado
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            if (authentication != null && authentication.isAuthenticated()) {
+                Object principal = authentication.getPrincipal();
+                if (principal instanceof UserDetails){
+                    String username = ((UserDetails)  principal).getUsername();
+                    Usuario usuario = usuarioServicio.obteberUsuarioPorNombre(username);
+                    venta.setUsuario(usuario);
+                }
+            }
 
             //Guardar la venta en la base datos
             Venta ventaGuardada = ventaRepositorio.save(venta);
@@ -159,28 +183,37 @@ public class VentaControlador {
 
     //Guardar la venta
     @PostMapping("/guardar")
-    public ResponseEntity<?> guardarVenta(@RequestBody VentaDTO ventaDTO){
+    public ResponseEntity<?> guardarVenta(@RequestBody VentaDTO ventaDTO, Principal principal){
         try {
-            //Llamar al servicio para guardar la venta
-            Venta respuesta = ventaServicio.guardarVenta(ventaDTO);
+            //Guardar la venta utilizando el servicio
+            Venta ventaGuardada = ventaServicio.guardarVenta(ventaDTO);
 
-            //Retornar una respues con los datos actualizados
+            //Crear la respuesta
             Map<String, Object> response = new HashMap<>();
-            response.put("message","Venta guardada con exito");
-            response.put("detallesVenta", respuesta.getDetalles() != null ? respuesta.getDetalles().stream()
-                    .map(detalle ->{
-                        Producto producto = detalle.getProducto();
-                        Map<String,Object> productoData = new HashMap<>();
-                        productoData.put("productoId",producto.getIdProducto());
-                        productoData.put("cantidad",producto.getCantidadProducto());
-                        return productoData;
-                    })
-                    .toList(): Collections.emptyList());
+            response.put("message", "Venta Guardada con éxito");
+            response.put("ventaId", ventaGuardada.getIdVenta());
+            response.put("totalVenta", ventaGuardada.getTotalVenta());
+            response.put("fechaVenta", ventaGuardada.getFechVenta());
+            response.put("usuario",ventaGuardada.getUsuario().getNombreUsuario());
+            response.put("detallesVenta",ventaGuardada.getDetalles().stream().map(detalle ->{
+                Map<String, Object> detalleData = new HashMap<>();
+                detalleData.put("producto", detalle.getProducto().getNombreProducto());
+                detalleData.put("cantidad", detalle.getCantidad());
+                detalleData.put("precio", detalle.getPrecio());
+                detalleData.put("ventaId",ventaGuardada.getIdVenta());//Asignar ventaId a cada detalle
+                return detalleData;
+            }).toList());
+
             return ResponseEntity.ok(response);
+
+        }catch (RuntimeException e){
+            //Manejo de errores de negocio como stock insuficiente
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("message", "Error al guardar la venta", "error", e.getMessage()));
         }catch (Exception e){
-            log.error("Error al guardar la venta", e);
+            //Manejo de errores generales
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(Map.of("message","Error al guardar la venta","error",e.getMessage()));
+                    .body(Map.of("message", "Error inesperado al guardar la venta", "error",e.getMessage()));
         }
     }
 
