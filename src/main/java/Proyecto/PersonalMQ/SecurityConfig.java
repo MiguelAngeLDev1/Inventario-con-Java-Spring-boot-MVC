@@ -24,7 +24,7 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())// Desactiva la protección CSRF
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/login", "/css/**","/js/**").permitAll()//Rutas publicas
+                        .requestMatchers("/login","usuarios/registro","usuarios/registrar", "/css/**","/js/**").permitAll()//Rutas publicas
                         .anyRequest().authenticated()//Todas las demas requieren autenticacion
                 )
                 .formLogin(form -> form

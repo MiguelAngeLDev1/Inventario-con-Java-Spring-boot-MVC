@@ -11,7 +11,6 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
 </head>
 <body>
-
 <div>
     <nav class="navbar navbar-expand-lg bg-body-tertiary">
         <div class="container-fluid">
@@ -21,7 +20,7 @@
             </button>
             <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
                 <div class="navbar-nav">
-                    <a class="nav-link active" aria-current="page" ><i class="fa-solid fa-house"></i> Inicio Secion</a>
+                    <a href="/login" class="nav-link active" aria-current="page" ><i class="fa-solid fa-house"></i> Inicio Secion</a>
                     <a href="usuarios/registro" class="nav-link active" aria-current="page" ><i class="fa-solid fa-user-plus"></i> Crear Usuario</a>
 
                 </div>
@@ -30,34 +29,26 @@
     </nav>
 </div>
 
-<br>
-<div class="position-relative py-2 px-4 t ">
-    <h1>Bienvenido a <span>Inventario web</span></h1>
-    <p class="user-select-none">Te doy la bienvenida a mi aplicativo web gestion de inventario,<br>Inicia Sesion Aqui.
-    </p>
-</div>
 
-<div class="container mt-4">
-    <form th:action="@{/login}" method="post">
-        <div class="mb-3">
-            <label for="nombreUsuario" class="form-label">Nombre de Usuario</label>
-            <input name="username" type="text" class="form-control" id="nombreUsuario" aria-describedby="emailHelp" required>
-            <div id="emailHelp" class="form-text"></div>
-        </div>
-        <div class="mb-3">
-            <label for="password" class="form-label">Contraseña</label>
-            <input type="password" class="form-control" id="password" name="password" required>
-        </div>
-        <div class="mb-3 form-check">
-            <input type="checkbox" class="form-check-input" id="exampleCheck1">
-            <label class="form-check-label" for="exampleCheck1"></label>
-        </div>
+<h1>Registro Usuario</h1>
+<form id="registroForm">
+    <label for="nombreUsuario">Nombre de Usuario:</label>
+    <input type="text" id="nombreUsuario" name="nombreUsuario" required>
+    <br>
 
-        <button type="submit" class="btn btn-primary">Ingresar</button>
-    </form>
-</div>
+    <label for="contrasenia">Contraseña:</label>
+    <input type="password" id="contrasenia" name="contrasenia" required>
+    <br>
 
+    <label for="rol">Rol:</label>
+    <select id="rol" name="rol" required>
+        <option value="USER">Usuario</option>
+        <option value="ADMIN">Administrador</option>
+    </select>
+    <br>
 
+    <button type="button" onclick="registrarUsuario()">Registro</button>
+</form>
 <br>
 <br>
 <br>
@@ -76,5 +67,39 @@
     </div>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+<script>
+    async function registrarUsuario(){
+        const nombreUsuario = document.getElementById("nombreUsuario").value;
+        const contrasenia = document.getElementById("contrasenia").value;
+        const rol = document.getElementById("rol").value;
+
+        const datos = {
+            nombreUsuario: nombreUsuario,
+            contrasenia: contrasenia,
+            rol: rol
+        };
+
+        try {
+            const response = await fetch("http://localhost:8081/usuarios/registrar",{
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(datos)
+            });
+
+            if (response.ok){
+                const result = await response.json();
+                alert(result.message);
+            }else {
+                const error = await response.json();
+                alert("Error: " + error.error);
+            }
+        }catch (error){
+            console.error("Error al registrar el usuario: ", error);
+            alert("Error inesperado");
+        }
+    }
+</script>
 </body>
 </html>
