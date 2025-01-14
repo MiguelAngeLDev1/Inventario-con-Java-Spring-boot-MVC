@@ -2,6 +2,8 @@ package Proyecto.PersonalMQ.controlers;
 
 import Proyecto.PersonalMQ.models.Categoria;
 import Proyecto.PersonalMQ.models.Producto;
+import Proyecto.PersonalMQ.models.Usuario;
+import Proyecto.PersonalMQ.services.UsuarioServicio;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import Proyecto.PersonalMQ.services.CategoriaServicio;
 import Proyecto.PersonalMQ.services.ProductoServicio;
 
+import java.security.Principal;
 import java.util.List;
 
 @Controller
@@ -24,9 +27,18 @@ public class ProductoControlador {
 
     @Autowired
     private ProductoServicio productoServicio;
+    @Autowired
+    private UsuarioServicio usuarioServicio;
 
     @GetMapping("/")
-    public String index(Model model) {
+    public String index(Model model, Principal principal) {
+        String nombreUsuario = principal.getName(); //Obtener el nombre del usuario autenticado
+
+        //Traigo al usuario de la base de datos
+        Usuario usuario = usuarioServicio.obteberUsuarioPorNombre(nombreUsuario);
+
+        //Agregar el nombre del usuario al modelo para que este disponible en la vista
+        model.addAttribute("nombreUsuario", usuario.getNombreUsuario());
         return "index";
     }
 
